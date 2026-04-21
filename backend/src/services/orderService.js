@@ -17,12 +17,16 @@ exports.createOrder = async(data)=>{
     const event = await prisma.eventQueue.create({
         data:{
             eventId:uuidv4(),
-            type:'ORDER_CREATE',
+            type:'ORDER_CREATED',
             payload:order,
             status:'PENDING'
         }
     });
-    emitOrderCreated(event)
+    try {
+        await emitOrderCreated(event)
+    } catch (error) {
+        console.error("Emitter Failed:",error.message)
+    }
 
     return order
 

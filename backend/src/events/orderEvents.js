@@ -8,7 +8,11 @@ exports.emitOrderCreated = async (event) =>{
             eventId:event.eventId,
             type:event.type,
             data:event.payload
-        })
+        },
+        {
+            timeout:3000
+        }
+    )
 
         await prisma.eventQueue.update({
             where:{eventId:event.eventId},
@@ -16,5 +20,9 @@ exports.emitOrderCreated = async (event) =>{
         })
     } catch (error) {
        console.error("Event emission failed ",error.message)
+       await prisma.eventQueue.update({
+        where:{eventId:event.eventId},
+        data:{status:'FAILED'}
+       })
     }
 }
