@@ -50,5 +50,7 @@ model EventQueue {
   type      String
   payload   Json
   status    String   @default("PENDING")
+  retryCount Int @default(0)
+  lastAttemptAt DateTime?
   createdAt DateTime @default(now())
 }
