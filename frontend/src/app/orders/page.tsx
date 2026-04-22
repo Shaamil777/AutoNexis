@@ -5,7 +5,7 @@ import useSWR from "swr";
 import Link from "next/link";
 import { fetcher } from "@/lib/api";
 import { Badge } from "@/components/ui/Badge";
-import { Search, Filter, RefreshCw, Eye, Skull } from "lucide-react";
+import { Filter, RefreshCw, Eye, AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type Order = {
@@ -32,125 +32,123 @@ export default function OrdersPage() {
   );
 
   return (
-    <div className="space-y-10 animate-in fade-in duration-700">
+    <div className="space-y-6 animate-fade-in">
+      {/* Page Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">Orders</h1>
-          <p className="text-sm font-medium text-slate-500 mt-1.5 uppercase tracking-wide">Manage and audit system order flow</p>
+          <h1 className="text-2xl font-bold text-slate-900">Orders</h1>
+          <p className="text-sm text-slate-500 mt-1">View and manage all system orders</p>
         </div>
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => mutate()}
-            className="flex items-center gap-2 px-4 py-2.5 text-sm font-bold text-slate-700 bg-white border-2 border-slate-100 rounded-xl hover:bg-slate-50 hover:border-slate-200 shadow-sm transition-all active:scale-95"
-          >
-            <RefreshCw className={`w-4 h-4 ${isLoading ? "animate-spin" : ""}`} />
-            Sync Orders
-          </button>
-        </div>
+        <button
+          onClick={() => mutate()}
+          className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
+        >
+          <RefreshCw className={`w-4 h-4 ${isLoading ? "animate-spin" : ""}`} />
+          Refresh
+        </button>
       </div>
 
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-        <div className="p-5 border-b border-slate-100 flex flex-col sm:flex-row gap-5 items-center justify-between bg-slate-50/30">
-          <div className="flex items-center gap-4 w-full sm:w-auto">
-            <div className="flex items-center gap-2 bg-white px-3 py-1.5 border border-slate-200 rounded-lg shadow-sm">
-              <Filter className="w-3.5 h-3.5 text-slate-400" />
-              <select
-                title="Status filter"
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-                className="text-xs font-bold text-slate-700 outline-none cursor-pointer bg-transparent"
-              >
-                <option value="ALL">All Statuses</option>
-                <option value="PENDING">Pending</option>
-                <option value="PROCESSING">Processing</option>
-                <option value="COMPLETED">Completed</option>
-                <option value="FAILED">Failed</option>
-              </select>
-            </div>
-            <div className="flex items-center gap-2 bg-white px-3 py-1.5 border border-slate-200 rounded-lg shadow-sm">
-              <select
-                title="Priority filter"
-                value={priorityFilter}
-                onChange={(e) => setPriorityFilter(e.target.value)}
-                className="text-xs font-bold text-slate-700 outline-none cursor-pointer bg-transparent"
-              >
-                <option value="ALL">All Priorities</option>
-                <option value="HIGH">High Priority</option>
-                <option value="NORMAL">Normal</option>
-                <option value="LOW">Low Priority</option>
-              </select>
-            </div>
+      {/* Table Card */}
+      <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+        {/* Filters */}
+        <div className="p-4 border-b border-slate-100 flex flex-wrap gap-3 items-center bg-slate-50/50">
+          <div className="flex items-center gap-2">
+            <Filter className="w-4 h-4 text-slate-400" />
+            <span className="text-xs font-medium text-slate-500">Filters:</span>
           </div>
+          <select
+            title="Status filter"
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="text-sm font-medium text-slate-700 bg-white border border-slate-200 rounded-lg px-3 py-1.5 outline-none cursor-pointer focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+          >
+            <option value="ALL">All Statuses</option>
+            <option value="PENDING">Pending</option>
+            <option value="PROCESSING">Processing</option>
+            <option value="COMPLETED">Completed</option>
+            <option value="FAILED">Failed</option>
+          </select>
+          <select
+            title="Priority filter"
+            value={priorityFilter}
+            onChange={(e) => setPriorityFilter(e.target.value)}
+            className="text-sm font-medium text-slate-700 bg-white border border-slate-200 rounded-lg px-3 py-1.5 outline-none cursor-pointer focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+          >
+            <option value="ALL">All Priorities</option>
+            <option value="HIGH">High</option>
+            <option value="NORMAL">Normal</option>
+            <option value="LOW">Low</option>
+          </select>
         </div>
 
+        {/* Table */}
         <div className="overflow-x-auto">
           <table className="w-full text-sm text-left">
             <thead>
-              <tr className="bg-slate-50/50 border-b border-slate-100">
-                <th className="px-6 py-4 font-black uppercase tracking-widest text-[10px] text-slate-400">Order Ref</th>
-                <th className="px-6 py-4 font-black uppercase tracking-widest text-[10px] text-slate-400">Customer</th>
-                <th className="px-6 py-4 font-black uppercase tracking-widest text-[10px] text-slate-400">Revenue</th>
-                <th className="px-6 py-4 font-black uppercase tracking-widest text-[10px] text-slate-400">Status</th>
-                <th className="px-6 py-4 font-black uppercase tracking-widest text-[10px] text-slate-400">Tier</th>
-                <th className="px-6 py-4 font-black uppercase tracking-widest text-[10px] text-slate-400">Timestamp</th>
-                <th className="px-6 py-4 font-black uppercase tracking-widest text-[10px] text-slate-400 text-right">Actions</th>
+              <tr className="border-b border-slate-100 bg-slate-50/30">
+                <th className="px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Order ID</th>
+                <th className="px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Customer</th>
+                <th className="px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Amount</th>
+                <th className="px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Status</th>
+                <th className="px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Priority</th>
+                <th className="px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Created</th>
+                <th className="px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-50">
+            <tbody className="divide-y divide-slate-100">
+              {/* Loading */}
               {isLoading && !orders && (
                 <tr>
-                  <td colSpan={7} className="px-6 py-20 text-center">
-                    <RefreshCw className="w-8 h-8 animate-spin mx-auto mb-3 text-slate-300" />
-                    <p className="text-xs font-bold uppercase tracking-widest text-slate-400">Retrieving system records...</p>
+                  <td colSpan={7} className="px-5 py-16 text-center">
+                    <RefreshCw className="w-6 h-6 animate-spin mx-auto mb-2 text-slate-300" />
+                    <p className="text-sm text-slate-400">Loading orders...</p>
                   </td>
                 </tr>
               )}
+              {/* Error */}
               {error && (
                 <tr>
-                  <td colSpan={7} className="px-6 py-12 text-center text-red-500 font-bold bg-red-50/30">
-                    <Skull className="w-6 h-6 mx-auto mb-2 opacity-50" />
-                    Connection Error: Backend unreachable
+                  <td colSpan={7} className="px-5 py-12 text-center">
+                    <AlertTriangle className="w-6 h-6 mx-auto mb-2 text-red-400" />
+                    <p className="text-sm font-medium text-red-600">Could not connect to backend</p>
                   </td>
                 </tr>
               )}
+              {/* Empty */}
               {orders && orders.length === 0 && (
                 <tr>
-                  <td colSpan={7} className="px-6 py-20 text-center">
-                    <div className="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                      <Search className="w-6 h-6 text-slate-400" />
-                    </div>
-                    <p className="text-xs font-bold uppercase tracking-widest text-slate-400">No matching orders found</p>
+                  <td colSpan={7} className="px-5 py-16 text-center">
+                    <div className="text-slate-400 text-sm">No orders found matching your filters</div>
                   </td>
                 </tr>
               )}
+              {/* Data */}
               {orders?.map((order) => (
-                <tr key={order.id} className="hover:bg-slate-50/50 transition-colors group">
-                  <td className="px-6 py-4 font-mono text-xs text-slate-400 group-hover:text-slate-900 transition-colors">#{order.id.slice(0, 8)}</td>
-                  <td className="px-6 py-4">
-                    <div className="font-bold text-slate-900">{order.customerName}</div>
-                  </td>
-                  <td className="px-6 py-4 font-extrabold text-slate-900">${typeof order.amount === 'number' ? order.amount.toFixed(2) : order.amount}</td>
-                  <td className="px-6 py-4">
+                <tr key={order.id} className="hover:bg-slate-50 transition-colors">
+                  <td className="px-5 py-3.5 font-mono text-xs text-slate-500">#{order.id.slice(0, 8)}</td>
+                  <td className="px-5 py-3.5 font-medium text-slate-900">{order.customerName}</td>
+                  <td className="px-5 py-3.5 font-semibold text-slate-900 tabular-nums">${typeof order.amount === 'number' ? order.amount.toFixed(2) : order.amount}</td>
+                  <td className="px-5 py-3.5">
                     <Badge status={order.status}>{order.status}</Badge>
                   </td>
-                  <td className="px-6 py-4">
+                  <td className="px-5 py-3.5">
                     <span className={cn(
-                      "text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded-md",
-                      order.priority === 'HIGH' ? "bg-amber-100 text-amber-900" : "bg-slate-100 text-slate-600"
+                      "text-xs font-medium px-2 py-1 rounded-md",
+                      order.priority === 'HIGH' ? "bg-orange-50 text-orange-700 border border-orange-200" : "bg-slate-50 text-slate-600 border border-slate-200"
                     )}>
                       {order.priority}
                     </span>
                   </td>
-                  <td className="px-6 py-4 text-xs font-semibold text-slate-500">
+                  <td className="px-5 py-3.5 text-sm text-slate-500">
                     {new Date(order.createdAt).toLocaleString()}
                   </td>
-                  <td className="px-6 py-4 text-right">
+                  <td className="px-5 py-3.5 text-right">
                     <Link
                       href={`/orders/${order.id}`}
-                      className="inline-flex items-center gap-1.5 px-4 py-1.5 text-xs font-bold text-blue-600 bg-blue-50 hover:bg-blue-600 hover:text-white rounded-lg transition-all active:scale-95"
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors border border-blue-100"
                     >
                       <Eye className="w-3.5 h-3.5" />
-                      Details
+                      View
                     </Link>
                   </td>
                 </tr>

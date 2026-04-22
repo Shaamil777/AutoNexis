@@ -2,7 +2,7 @@
 
 import useSWR from "swr";
 import { fetcher } from "@/lib/api";
-import { LayoutDashboard, ShoppingCart, ListTree, Skull, RefreshCw, Trash2 } from "lucide-react";
+import { LayoutDashboard, ShoppingCart, ListTree, Skull, RefreshCw, Trash2, TrendingUp, AlertTriangle } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
 import { cn } from "@/lib/utils";
 import axios from "axios";
@@ -21,17 +21,18 @@ type DashboardStats = {
     dlqEvents: number;
   };
 };
+
 export default function DashboardPage() {
   const { data, error, isLoading, mutate } = useSWR<DashboardStats>("/orders/stats", fetcher, {
-    refreshInterval: 10000, // Auto-refresh every 10 seconds
+    refreshInterval: 10000,
   });
 
   const handleCleanDB = async () => {
-    if (confirm("Are you sure you want to PERMANENTLY delete all orders and events? This cannot be undone.")) {
+    if (confirm("Are you sure you want to delete all orders and events? This cannot be undone.")) {
       try {
         await axios.delete(`${API_URL}/orders/clean`);
         alert("Database cleaned successfully!");
-        mutate(); // Refresh the stats
+        mutate();
       } catch (err) {
         alert("Failed to clean database.");
         console.error(err);
@@ -40,23 +41,24 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="space-y-10 animate-in fade-in duration-700">
+    <div className="space-y-8 animate-fade-in">
+      {/* Page Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">Dashboard</h1>
-          <p className="text-sm font-medium text-slate-500 mt-1.5 uppercase tracking-wide">Real-time system health and analytics</p>
+          <h1 className="text-2xl font-bold text-slate-900">Dashboard</h1>
+          <p className="text-sm text-slate-500 mt-1">Real-time system health overview</p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           <button
             onClick={handleCleanDB}
-            className="flex items-center gap-2 px-4 py-2.5 text-sm font-bold text-red-600 bg-white border-2 border-red-100 rounded-xl hover:bg-red-50 hover:border-red-200 shadow-sm transition-all active:scale-95"
+            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-red-600 bg-white border border-red-200 rounded-lg hover:bg-red-50 transition-colors"
           >
             <Trash2 className="w-4 h-4" />
-            Cleanup System
+            Clean Database
           </button>
           <button
             onClick={() => mutate()}
-            className="flex items-center gap-2 px-4 py-2.5 text-sm font-bold text-slate-700 bg-white border-2 border-slate-100 rounded-xl hover:bg-slate-50 hover:border-slate-200 shadow-sm transition-all active:scale-95"
+            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
           >
             <RefreshCw className={cn("w-4 h-4", isLoading ? "animate-spin" : "")} />
             Refresh
@@ -64,60 +66,65 @@ export default function DashboardPage() {
         </div>
       </div>
 
+      {/* Loading State */}
       {!data && !error && (
-        <div className="h-72 flex items-center justify-center border-2 border-dashed rounded-3xl border-slate-200 bg-slate-50/50">
+        <div className="h-64 flex items-center justify-center border border-dashed rounded-xl border-slate-200 bg-white">
           <div className="flex flex-col items-center text-slate-400">
-            <RefreshCw className="w-10 h-10 animate-spin mb-4" />
-            <p className="font-bold uppercase tracking-widest text-xs">Syncing with system...</p>
+            <RefreshCw className="w-8 h-8 animate-spin mb-3" />
+            <p className="text-sm font-medium">Loading dashboard data...</p>
           </div>
         </div>
       )}
 
+      {/* Error State */}
       {error && !data && (
-        <div className="p-8 bg-red-50 border-2 border-red-100 rounded-3xl shadow-sm">
-          <div className="flex items-center gap-3 text-red-800 mb-3">
-            <Skull className="w-6 h-6" />
-            <h3 className="text-lg font-extrabold uppercase tracking-tight">System Unavailable</h3>
+        <div className="p-6 bg-red-50 border border-red-200 rounded-xl">
+          <div className="flex items-center gap-3 text-red-700 mb-2">
+            <AlertTriangle className="w-5 h-5" />
+            <h3 className="text-base font-semibold">Cannot connect to backend</h3>
           </div>
-          <p className="text-red-700 font-medium mb-6 leading-relaxed">
-            The core API endpoint <code>/orders/stats</code> is unreachable. 
-            Please ensure your Node.js backend is active and the API contract is implemented.
+          <p className="text-red-600 text-sm leading-relaxed">
+            The API endpoint <code className="bg-red-100 px-1.5 py-0.5 rounded text-xs">/orders/stats</code> is unreachable. 
+            Please make sure the backend server is running.
           </p>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 opacity-50 pointer-events-none grayscale">
-            <MockMetrics />
-          </div>
         </div>
       )}
 
+      {/* Dashboard Content */}
       {data && (
-        <div className="space-y-10">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-slate-900">
+        <div className="space-y-8">
+          {/* Stats Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             <StatCard
               title="Total Orders"
               value={data.totalOrders}
               icon={ShoppingCart}
               color="text-blue-600"
-              bg="bg-blue-100/50"
+              bgColor="bg-blue-50"
+              borderColor="border-blue-100"
             />
             <StatCard
               title="Failed Events"
               value={data.eventStats.failedEvents}
-              icon={ListTree}
+              icon={AlertTriangle}
               color="text-amber-600"
-              bg="bg-amber-100/50"
+              bgColor="bg-amber-50"
+              borderColor="border-amber-100"
             />
             <StatCard
-              title="DLQ Stalemate"
+              title="DLQ Events"
               value={data.eventStats.dlqEvents}
               icon={Skull}
               color="text-rose-600"
-              bg="bg-rose-100/50"
+              bgColor="bg-rose-50"
+              borderColor="border-rose-100"
             />
           </div>
 
-          <div className="pt-4">
-            <h2 className="text-xs font-black uppercase tracking-[0.2em] text-slate-400 mb-6 px-1">Order Pipeline Distribution</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {/* Order Status Distribution */}
+          <div>
+            <h2 className="text-base font-semibold text-slate-800 mb-4">Order Status Breakdown</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <StatusCount label="Pending" count={data.statusCounts.PENDING} status="PENDING" />
               <StatusCount label="Processing" count={data.statusCounts.PROCESSING} status="PROCESSING" />
               <StatusCount label="Completed" count={data.statusCounts.COMPLETED} status="COMPLETED" />
@@ -130,25 +137,15 @@ export default function DashboardPage() {
   );
 }
 
-function MockMetrics() {
+function StatCard({ title, value, icon: Icon, color, bgColor, borderColor }: any) {
   return (
-    <>
-      <StatCard title="Total Orders" value={142} icon={ShoppingCart} color="text-gray-500" bg="bg-gray-100" />
-      <StatCard title="Failed Events" value={5} icon={ListTree} color="text-gray-500" bg="bg-gray-100" />
-      <StatCard title="DLQ Events" value={2} icon={Skull} color="text-gray-500" bg="bg-gray-100" />
-    </>
-  );
-}
-
-function StatCard({ title, value, icon: Icon, color, bg }: any) {
-  return (
-    <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-7 flex items-start gap-5 transition-all hover:shadow-md hover:border-slate-300">
-      <div className={cn("p-4 rounded-xl shadow-inner", bg, color)}>
-        <Icon className="w-6 h-6" />
+    <div className={cn("bg-white rounded-xl border p-6 flex items-start gap-4 transition-all hover:shadow-sm", borderColor || "border-slate-200")}>
+      <div className={cn("p-3 rounded-lg", bgColor, color)}>
+        <Icon className="w-5 h-5" />
       </div>
       <div>
-        <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5">{title}</p>
-        <h3 className="text-3xl font-extrabold text-slate-900 tabular-nums">{value}</h3>
+        <p className="text-sm text-slate-500 font-medium">{title}</p>
+        <h3 className="text-2xl font-bold text-slate-900 mt-0.5 tabular-nums">{value}</h3>
       </div>
     </div>
   );
@@ -156,10 +153,10 @@ function StatCard({ title, value, icon: Icon, color, bg }: any) {
 
 function StatusCount({ label, count, status }: any) {
   return (
-    <div className="flex items-center justify-between p-5 rounded-xl bg-white border border-slate-200 shadow-sm hover:border-blue-200 transition-colors">
-      <div className="space-y-1">
-        <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">{label}</span>
-        <div className="text-2xl font-extrabold text-slate-900 tabular-nums">{count}</div>
+    <div className="flex items-center justify-between p-4 rounded-xl bg-white border border-slate-200 hover:shadow-sm transition-all">
+      <div>
+        <span className="text-sm text-slate-500 font-medium">{label}</span>
+        <div className="text-xl font-bold text-slate-900 mt-0.5 tabular-nums">{count}</div>
       </div>
       <Badge status={status}>{status}</Badge>
     </div>

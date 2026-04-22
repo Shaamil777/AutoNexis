@@ -8,8 +8,8 @@ import { cn } from "@/lib/utils";
 const navItems = [
   { name: "Dashboard", href: "/", icon: LayoutDashboard },
   { name: "Orders", href: "/orders", icon: ShoppingCart },
-  { name: "Events Queue", href: "/events", icon: ListTree },
-  { name: "DLQ View", href: "/dlq", icon: Skull },
+  { name: "Event Queue", href: "/events", icon: ListTree },
+  { name: "Dead Letter Queue", href: "/dlq", icon: Skull },
   { name: "Create Order", href: "/create", icon: PlusCircle },
 ];
 
@@ -17,18 +17,23 @@ export function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="w-64 border-r border-slate-800 bg-slate-950 flex flex-col fixed inset-y-0 z-50 shadow-xl font-sans">
-      <div className="p-6 border-b border-slate-800/60">
-        <h1 className="text-xl font-bold tracking-tight text-white flex items-center gap-2.5">
-          <div className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center shadow-lg shadow-blue-500/20">
-            <span className="text-white font-extrabold text-xs select-none">A</span>
+    <aside className="w-64 border-r border-slate-200 bg-white flex flex-col fixed inset-y-0 z-50 shadow-sm font-sans">
+      {/* Logo */}
+      <div className="p-5 border-b border-slate-100">
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center shadow-md">
+            <span className="text-white font-bold text-sm select-none">A</span>
           </div>
-          <span className="tracking-wide">Autonexis</span>
-        </h1>
-        <p className="text-[10px] uppercase tracking-widest text-slate-500 font-bold mt-2 ml-9">System Control</p>
+          <div>
+            <h1 className="text-base font-bold text-slate-900 tracking-tight">Autonexis</h1>
+            <p className="text-[11px] text-slate-400 font-medium">System Control Panel</p>
+          </div>
+        </div>
       </div>
 
-      <nav className="flex-1 px-3 py-6 space-y-1 overflow-y-auto">
+      {/* Navigation */}
+      <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+        <p className="px-3 py-2 text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Navigation</p>
         {navItems.map((item) => {
           const Icon = item.icon;
           const isActive = pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href));
@@ -37,23 +42,24 @@ export function Sidebar() {
               key={item.href}
               href={item.href}
               className={cn(
-                "flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 group",
+                "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all group",
                 isActive
-                  ? "bg-blue-600 text-white shadow-lg shadow-blue-600/20"
-                  : "text-slate-400 hover:bg-slate-900 hover:text-white"
+                  ? "bg-blue-50 text-blue-700 border border-blue-100"
+                  : "text-slate-600 hover:bg-slate-50 hover:text-slate-900 border border-transparent"
               )}
             >
-              <Icon className={cn("w-5 h-5 transition-colors", isActive ? "text-white" : "text-slate-500 group-hover:text-blue-400")} />
+              <Icon className={cn("w-[18px] h-[18px]", isActive ? "text-blue-600" : "text-slate-400 group-hover:text-slate-600")} />
               {item.name}
             </Link>
           );
         })}
       </nav>
 
-      <div className="p-4 border-t border-slate-800">
-        <div className="flex items-center gap-3 px-4 py-2 text-xs font-bold text-slate-500 uppercase tracking-wider">
-          <Settings className="w-4 h-4" />
-          <span>Version 1.0.0</span>
+      {/* Footer */}
+      <div className="p-4 border-t border-slate-100">
+        <div className="flex items-center gap-2.5 px-3 py-2 text-xs text-slate-400">
+          <Settings className="w-3.5 h-3.5" />
+          <span>v1.0.0</span>
         </div>
       </div>
     </aside>
