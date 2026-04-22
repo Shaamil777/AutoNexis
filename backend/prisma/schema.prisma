@@ -45,12 +45,14 @@ model Log {
 }
 
 model EventQueue {
-  id        Int      @id @default(autoincrement())
-  eventId   String   @unique
-  type      String
-  payload   Json
-  status    String   @default("PENDING")
-  retryCount Int @default(0)
+  id            Int       @id @default(autoincrement())
+  eventId       String    @unique
+  type          String
+  payload       Json
+  status        String    @default("PENDING")
+  retryCount    Int       @default(0)
+  lastError     String?
   lastAttemptAt DateTime?
-  createdAt DateTime @default(now())
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 }

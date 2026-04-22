@@ -109,14 +109,24 @@ export default function OrderDetailsPage() {
                   <ul className="divide-y divide-slate-100">
                     {order.eventHistory.map((event: any, i: number) => (
                       <li key={i} className="p-4 flex flex-col sm:flex-row gap-3 justify-between hover:bg-slate-50 transition-colors">
-                        <div>
-                          <div className="flex items-center gap-2 mb-1.5">
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-2 flex-wrap">
                             <span className="font-semibold text-sm text-slate-900">{event.type}</span>
                             <Badge status={event.status}>{event.status}</Badge>
+                            {event.retryCount > 0 && (
+                              <span className="text-xs font-medium text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded">
+                                {event.retryCount} retries
+                              </span>
+                            )}
                           </div>
                           {event.error && (
-                            <p className="text-xs text-red-600 font-mono bg-red-50 p-2 rounded-lg border border-red-100 mt-2 leading-relaxed">
+                            <p className="text-xs text-red-600 font-mono bg-red-50 p-2 rounded-lg border border-red-100 leading-relaxed">
                               {event.error}
+                            </p>
+                          )}
+                          {event.lastAttemptAt && (
+                            <p className="text-xs text-slate-400">
+                              Last attempt: {new Date(event.lastAttemptAt).toLocaleString()}
                             </p>
                           )}
                         </div>
